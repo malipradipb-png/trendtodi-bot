@@ -1,0 +1,22 @@
+name: reel
+on:
+  workflow_dispatch:
+  push:
+    paths: ["sample.json", "reel.py", "make.py", ".github/workflows/reel.yml"]
+permissions:
+  contents: write
+jobs:
+  make:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg fonts-noto-color-emoji
+      - run: pip install edge-tts playwright requests pillow && python -m playwright install --with-deps chromium
+      - run: python make.py sample.json
+      - run: |
+          git config user.name trendtodi-bot
+          git config user.email trendtodi-bot@users.noreply.github.com
+          git pull --rebase
+          git add out/
+          git commit -m "sample reel [skip ci]" || true
+          git push
